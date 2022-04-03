@@ -1,0 +1,64 @@
+1st Querry:
+
+SELECT ReportsTo ManagerId,
+       EmployeeId,
+       e.FirstName,
+       e.LastName,
+       c.CustomerId,
+       SUM(i.Total) Purchases
+FROM Employee e
+JOIN Customer c ON e.EmployeeId = c.SupportRepId
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+GROUP BY 2
+ORDER BY 6 DESC;
+
+
+2nd Querry:
+SELECT m.MediaTypeId,
+       m.Name MediaTypeName,
+       SUM(il.UnitPrice*il.Quantity) AS TotalSpent
+FROM MediaType m
+JOIN Track t ON m.MediaTypeId = t.MediaTypeId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+GROUP BY 1
+ORDER BY 3 DESC;
+
+
+3rd Querry:
+WITH ArtCountry AS
+  (SELECT c.Country,
+          art.ArtistId,
+          art.Name,
+          SUM(il.quantity*il.UnitPrice) Purchase,
+          c.CustomerId
+   FROM Customer c
+   JOIN Invoice i ON c.CustomerId = i.CustomerId
+   JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+   JOIN Track tr ON il.TrackId = tr.TrackId
+   JOIN Album Alb ON tr.AlbumId = alb.AlbumId
+   JOIN Artist art ON alb.ArtistId = art.ArtistId
+   GROUP BY 2)
+SELECT ac.Country,
+       ArtistId,
+       Name ArtistName,
+       MAX(Purchase) Spent
+FROM Customer c
+JOIN ArtCountry ac ON c.CustomerId = ac.CustomerId
+GROUP BY 1
+ORDER BY 4 DESC;
+
+
+4rth Querry:
+SELECT g.GenreId,
+       g.Name GenreName,
+       SUM(Quantity) Germany_SoldQty
+FROM Genre g
+JOIN Track tr ON g.GenreId = tr.GenreId
+JOIN InvoiceLine il ON tr.TrackId = il.TrackId
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+JOIN Customer c ON i.CustomerId = c.CustomerId
+WHERE c.Country = 'Germany'
+GROUP BY 1,
+         2
+ORDER BY 3 DESC;
+
